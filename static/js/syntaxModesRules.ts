@@ -6,6 +6,50 @@ interface Rule {
 
 type Rules = Record<string, Rule[]>;
 
+//variables
+
+var _PRINT = "print";
+var _ASK = "ask";
+var _ECHO = "echo";
+var _FORWARD = "forward";
+var _TURN = "turn";
+
+//level 2
+var _IS = "is";
+var _AT = "at";
+var _RANDOM = "random"; //random needs to appear in the tree for further processing so does not start with _ or is uppercase
+
+//level 4
+var _IN = "in";
+var _IF = "if";
+var _ELSE = "else";
+var _AND = "and";
+
+//level 5
+var _REPEAT = "repeat";
+var _TIMES = "times";
+
+//level 8
+var _FOR = "for";
+var _RANGE = "range";
+var _TO = "to";
+var _STEP = "step";
+
+//level 9
+var _ELIF = "elif";
+
+//level 11
+var _INPUT = "input";
+
+//level 14
+var _OR = "or";
+
+//level 17
+var _WHILE = "while";
+
+//level 19
+var _LENGTH = "length";
+
 // Basic highlighter rules we can use in most levels
 // - Highlighters always begin in the 'start' state, and see line by line (no newlines!)
 // - We try to recognize as many commands and tokens as possible in 'start', only deviating
@@ -31,7 +75,7 @@ function baseRules(): Rules {
         token: 'constant.character',
       },
       {
-        regex: 'at random',
+        regex: _AT + ' ' + _RANDOM,
         token: 'keyword'
       },
       {
@@ -49,12 +93,12 @@ const LEVELS = [
       rule_printSpace('gobble'),
       rule_turtle(),
       recognize('start', {
-        regex: keywordWithSpace('echo'),
+        regex: keywordWithSpace(_ECHO),
         token: 'keyword',
         next: 'gobble',
       }),
       recognize('start', {
-        regex: keywordWithSpace('ask'),
+        regex: keywordWithSpace(_ASK),
         token: 'keyword',
         next: 'gobble',
       }),
@@ -406,7 +450,7 @@ function pipe(val: any, ...fns: Array<(x: any) => any>) {
  */
 function rule_printSpace(next?: string) {
   return recognize('start', {
-    regex: keywordWithSpace('print'),
+    regex: keywordWithSpace(_PRINT),
     token: 'keyword',
     next: next ?? 'start',
   });
@@ -417,7 +461,7 @@ function rule_printSpace(next?: string) {
  */
 function rule_isAsk(next?: string) {
   return recognize('start', {
-    regex: '(\\w+)( is ask )',
+    regex: '(\\w+)( ' + _IS + ' ' + _ASK + ')',
     token: ['text', 'keyword'],
     next: next ?? 'expression_eol',
   });
@@ -428,7 +472,7 @@ function rule_isAsk(next?: string) {
  */
 function rule_is(next?: string) {
   return recognize('start', {
-    regex: '(\\w+)( is )',
+    regex: '(\\w+)( ' + _IS + ' )',
     token: ['text', 'keyword'],
     next: next ?? 'expression_eol',
   });
@@ -439,7 +483,7 @@ function rule_is(next?: string) {
  */
 function rule_printParen() {
   return recognize('start', {
-    regex: '(print)(\\()',
+    regex: '(' + _PRINT + ')(\\()',
     token: ['keyword', 'paren.lparen'],
     next: 'start'
   });
@@ -448,12 +492,13 @@ function rule_printParen() {
 function rule_turtle() {
     return comp(
       recognize('start', {
-        regex: 'turn (left|right)?',
+        // Note: left and right are not yet keywords
+        regex: _TURN + ' (left|right)?',
         token: 'keyword',
         next: 'start',
       }),
       recognize('start', {
-        regex: 'forward',
+        regex: _FORWARD,
         token: 'keyword',
         next: 'start',
       })
@@ -461,12 +506,12 @@ function rule_turtle() {
 }
 
 function rule_sleep() {
-    return recognize('start', {
-        regex: 'sleep',
-        token: 'keyword',
-        next: 'start',
-      }
-    )
+  return recognize('start', {
+      regex: 'sleep',
+      token: 'keyword',
+      next: 'start',
+    }
+  )
 }
 
 
@@ -478,7 +523,7 @@ function rule_sleep() {
  */
 function rule_isInputParen() {
   return recognize('start', {
-    regex: '(\\w+)( is input)(\\()',
+    regex: '(\\w+)( ' + _IS + ' ' + _INPUT + ')(\\()',
     token: ['text', 'keyword', 'paren.lparen'],
     next: 'start'
   });
@@ -494,7 +539,7 @@ function rule_expressions() {
       token: 'constant.character',
     }),
     recognize('start', {
-      regex: 'at random',
+      regex: _AT + _RANDOM,
       token: 'keyword'
     }),
     recognize('start', {
@@ -511,16 +556,16 @@ function rule_expressions() {
 function rule_ifElseOneLine() {
   return comp(
     recognize('start', {
-      regex: keywordWithSpace('if'),
+      regex: keywordWithSpace(_IF),
       token: 'keyword',
       next: 'condition',
     }),
     recognize('start', {
-      regex: keywordWithSpace('else'),
+      regex: keywordWithSpace(_ELSE),
       token: 'keyword',
     }),
     recognize('condition', {
-      regex: keywordWithSpace('((is)|(in))'),
+      regex: keywordWithSpace('((' + _IS + ')|(' + _IN + '))'),
       token: 'keyword',
       next: 'start',
     }),
@@ -530,16 +575,16 @@ function rule_ifElseOneLine() {
 function rule_ifElse() {
   return comp(
     recognize('start', {
-      regex: keywordWithSpace('if'),
+      regex: keywordWithSpace(_IF),
       token: 'keyword',
       next: 'condition',
     }),
     recognize('start', {
-      regex: '\\b' + 'else' + '\\b',
+      regex: '\\b' + _ELSE + '\\b',
       token: 'keyword',
     }),
     recognize('condition', {
-      regex: keywordWithSpace('((is)|(in))'),
+      regex: keywordWithSpace('((' + _IS + ')|(' + _IN + '))'),
       token: 'keyword',
       next: 'start',
     }),
@@ -571,28 +616,28 @@ function rule_arithmetic() {
  */
 function rule_repeat() {
   return recognize('start', {
-    regex: '(repeat)( \\w+ )(times)',
+    regex: '(' + _REPEAT + ')( \\w+ )(' + _TIMES + ')',
     token: ['keyword', 'text', 'keyword'],
   });
 }
 
 function rule_for(){
   return recognize('start', {
-    regex: '(for )(\\w+)( in )(\\w+)',
+    regex: '(' + _FOR + ' )(\\w+)( ' + _IN + ' )(\\w+)',
     token: ['keyword', 'text', 'keyword', 'text'],
   });
 }
 
 function rule_forRange() {
   return recognize('start', {
-    regex: '(for )(\\w+)( in range )(\\w+)( to )(\\w+)',
+    regex: '(' + _FOR + ' )(\\w+)( ' + _IN + ' ' + _RANGE + ' )(\\w+)( to )(\\w+)',
     token: ['keyword', 'text', 'keyword', 'text', 'keyword', 'text'],
   });
 }
 
 function rule_forRangeParen() {
   return recognize('start', {
-    regex: '(for )(\\w+)( in range)(\\()([\\s\\w]+)(,)([\\s\\w]+)(\\))',
+    regex: '(' + _FOR + ' )(\\w+)( ' + _IN + ' ' + _RANGE + ')(\\()([\\s\\w]+)(,)([\\s\\w]+)(\\))',
     token: ['keyword', 'text', 'keyword', 'paren.lparen', 'text', 'punctuation.operator', 'text', 'paren.rparen'],
   });
 }
