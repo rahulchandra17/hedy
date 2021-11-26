@@ -1,0 +1,26 @@
+var _PRINT:string,_ASK:string,_ECHO:string,_FORWARD:string,_TURN:string,_IS:string,_AT:string,random:string,_IN:string,_IF:string,_ELSE:string;
+var _AND,_REPEAT:string,_TIMES:string,_FOR:string,_RANGE:string,_TO,_STEP,_ELIF,_INPUT:string,_OR:string,_WHILE:string, _LENGTH:string;
+
+_PRINT = "print";
+_ASK = "ask";
+_ECHO = "echo";
+_FORWARD = "forward";
+_TURN = "turn";
+_IS = "is";
+_AT = "at";
+random = "random";
+_IN = "in";
+_IF = "if";
+_ELSE = "else";
+_AND = "and";
+_REPEAT = "repeat";
+_TIMES = "times";
+_FOR = "for";
+_RANGE = "range";
+_TO = "to";
+_STEP = "step";
+_ELIF = "elif";
+_INPUT = "input";
+_OR = "or";
+_WHILE = "while";
+_LENGTH = "length";

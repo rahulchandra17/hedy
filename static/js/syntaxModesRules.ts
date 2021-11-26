@@ -1,3 +1,5 @@
+import './syntaxKeywords'
+
 interface Rule {
   readonly regex: string;
   readonly token: string | string[];
@@ -5,50 +7,6 @@ interface Rule {
 }
 
 type Rules = Record<string, Rule[]>;
-
-//variables
-
-var _PRINT = "print";
-var _ASK = "ask";
-var _ECHO = "echo";
-var _FORWARD = "forward";
-var _TURN = "turn";
-
-//level 2
-var _IS = "is";
-var _AT = "at";
-var _RANDOM = "random"; //random needs to appear in the tree for further processing so does not start with _ or is uppercase
-
-//level 4
-var _IN = "in";
-var _IF = "if";
-var _ELSE = "else";
-var _AND = "and";
-
-//level 5
-var _REPEAT = "repeat";
-var _TIMES = "times";
-
-//level 8
-var _FOR = "for";
-var _RANGE = "range";
-var _TO = "to";
-var _STEP = "step";
-
-//level 9
-var _ELIF = "elif";
-
-//level 11
-var _INPUT = "input";
-
-//level 14
-var _OR = "or";
-
-//level 17
-var _WHILE = "while";
-
-//level 19
-var _LENGTH = "length";
 
 // Basic highlighter rules we can use in most levels
 // - Highlighters always begin in the 'start' state, and see line by line (no newlines!)
@@ -75,7 +33,7 @@ function baseRules(): Rules {
         token: 'constant.character',
       },
       {
-        regex: _AT + ' ' + _RANDOM,
+        regex: _AT + ' ' + random,
         token: 'keyword'
       },
       {
@@ -539,7 +497,7 @@ function rule_expressions() {
       token: 'constant.character',
     }),
     recognize('start', {
-      regex: _AT + _RANDOM,
+      regex: _AT + random,
       token: 'keyword'
     }),
     recognize('start', {
