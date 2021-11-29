@@ -1,5 +1,5 @@
 // It's important that this file gets loaded first
-import './syntaxModesRules';
+import './syntaxModesRules-en';
 
 import { modal, error, success } from './modal';
 import { auth } from './auth';
