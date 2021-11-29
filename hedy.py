@@ -6,6 +6,7 @@ from lark import Tree, Transformer, visitors, v_args
 from os import path
 
 import hedy
+import hedy_translation
 import utils
 from collections import namedtuple
 import hashlib
@@ -22,7 +23,7 @@ MAX_LINES = 100
 LEVEL_STARTING_INDENTATION = 8
 
 # Boolean variables to allow code which is under construction to not be executed
-local_keywords_enabled = False # If this is True, only the keywords in the specified language can be used for now
+local_keywords_enabled = True # If this is True, only the keywords in the specified language can be used for now
 
 #dictionary to store transpilers
 TRANSPILER_LOOKUP = {}
@@ -104,6 +105,19 @@ commands_per_level = {1: ['print', 'ask', 'echo', 'turn', 'forward'] ,
                       22: ['print', 'ask', 'is', 'if', 'for', 'elif', 'while', 'turn', 'forward'],
                       23: ['print', 'ask', 'is', 'if', 'for', 'elif', 'while', 'turn', 'forward']
                       }
+
+
+def localizing_command_per_level(lang, level):
+    if not local_keywords_enabled:
+        return commands_per_level[level]
+
+    en_commands = commands_per_level[level].copy()
+    lang_commands = hedy_translation.translate_list_keywords(en_commands, 'en', lang)
+    
+    en_lang_commands = list(set(en_commands + lang_commands))
+            
+    return en_lang_commands
+    
 
 # TODO: these need to be taken from the translated grammar keywords based on the language
 command_turn_literals = ['right', 'left']
@@ -211,6 +225,7 @@ def closest_command(invalid_command, known_commands):
 
     if min_command == invalid_command:
         return None
+
     return min_command
 
 
@@ -1575,22 +1590,6 @@ def create_grammar(level, lang="en"):
 
     return result
 
-def get_suggestions_for_language(lang):
-    script_dir = path.abspath(path.dirname(__file__))
-    filename = "suggestions-" + str(lang) + ".yaml"
-    if not (path.isfile(path.join(script_dir, "grammars", filename))):
-        filename = "suggestions-en.yaml"
-    with open(path.join(script_dir, "grammars", filename), "r", encoding="utf-8") as file:
-        documents = yaml.full_load(file)
-
-        suggestions = {}
-
-        for item, doc in documents.items():
-         suggestions[item] = doc
-
-    return suggestions
-
-
 def save_total_grammar_file(level, grammar, lang):
     # Load Lark grammars relative to directory of current file
     script_dir = path.abspath(path.dirname(__file__))
@@ -1866,7 +1865,7 @@ def is_program_valid(program_root, input_string, level, lang):
             raise exceptions.UnsupportedFloatException(value=''.join(invalid_info.arguments))
         else:
             invalid_command = invalid_info.command
-            closest = closest_command(invalid_command, get_suggestions_for_language('en')[level])
+            closest = closest_command(invalid_command, localizing_command_per_level(lang, level))
             fixed_code = None
             result = None
             if closest:

@@ -1,4 +1,4 @@
-_PRINT: "drukaf" | "print" 
+_PRINT: "print" | "print" 
 _ASK: "vraag" | "ask" 
 _ECHO: "echo" | "echo" 
 _FORWARD: "vooruit" | "forward" 

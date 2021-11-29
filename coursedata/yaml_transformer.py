@@ -15,9 +15,9 @@ def transform_yaml_to_lark(only_new_lang=True):
   Args:
       only_new_lang (bool, optional): Specifies if only a lark file should be created for a new language or for all languages. Defaults to True.
   """
-  input_path = '../coursedata/keywords/'
-  current_grammar_path = '../grammars/'
-  output_path = '../grammars-transformed/'
+  input_path = './coursedata/keywords/'
+  current_grammar_path = './grammars/'
+  output_path = './grammars-transformed/'
   Path(output_path).mkdir(parents=True, exist_ok=True)
 
   yaml_languages = [f.replace('.yaml', '') for f in os.listdir(input_path) if
@@ -47,13 +47,16 @@ def transform_yaml_to_lark(only_new_lang=True):
       list_of_translations = []
       
       for idx, command_combo in enumerate(command_combinations):
+        command_en = list(default_command_combinations[idx].keys())[0]
+        translation_en = default_command_combinations[idx][command_en]
+        
         try:
           command = list(command_combo.keys())[0]
           translation = command_combo[command]
         except IndexError:
-          command = list(default_command_combinations[idx].keys())[0]
-          translation = default_command_combinations[idx][command]
-          
+          command = command_en
+          translation = translation_en
+        
         if yaml_lang != 'en':
           if translation in list_of_translations:
             raise ValueError(f'{translation} is a duplicate translation. This is not desired when creating lark files')
@@ -64,7 +67,7 @@ def transform_yaml_to_lark(only_new_lang=True):
           command_upper = command.upper()
           command = '_' + command_upper
 
-        f.write(f'{command}: "{translation}" \n')
+        f.write(f'{command}: "{translation}" | "{translation_en}" \n')
 
 def transform_level_defaults(old_level, new_level=None, function=nop):
   input_path = '../coursedata/level-defaults'
